@@ -9,7 +9,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 func main() {
 	if len(os.Args) == 1 {
