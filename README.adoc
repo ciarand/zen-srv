@@ -1,5 +1,5 @@
-zen-server
-==========
+zen-srv
+=======
 
 [quote]
 A tiny web server that responds to `GET /zen` requests with a new,
@@ -13,14 +13,14 @@ Getting the taglines
 
 [,bash]
 ----
-./zen fetch 10 > zens.txt # fetches 10 from GitHub's API
+./zen-srv fetch 10 > zens.txt # fetches 10 from GitHub's API
 ----
 
 Running the server
 
 [,bash]
 ----
-./zen
+./zen-srv
 ----
 
 License
