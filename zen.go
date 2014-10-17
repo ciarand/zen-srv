@@ -13,8 +13,27 @@ import (
 	"time"
 )
 
+var (
+	portFlag   *string
+	binaryName string
+	errLog     *log.Logger
+	regLog     *log.Logger
+)
+
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+
+	errLog = log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime)
+	regLog = log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime)
+
+	// go run zen.go
+	if len(os.Args) > 2 && os.Args[0] == "go" && os.Args[1] == "run" {
+		binaryName = strings.Join(os.Args[0:2], " ")
+	} else {
+		binaryName = os.Args[0]
+	}
+
+	portFlag = flag.String("p", "8080", "the port to listen on")
 
 	flag.Parse()
 }
@@ -28,18 +47,23 @@ func main() {
 	}
 
 	if len(args) > 2 || args[0] != "fetch" {
-		log.Println("ERROR: unknown command structure:", strings.Join(args, " "))
+		errLog.Println("unknown command structure:", strings.Join(args, " "))
 		os.Exit(1)
 	}
 
-	var num = 100
+	// default is 1
+	var num = 1
 	var err error
 
-	if len(args) == 3 {
+	if len(args) == 2 {
 		num, err = strconv.Atoi(args[1])
 		if err != nil {
-			log.Fatalf("ERROR: couldn't translate %s into a number: %s", args[1], err)
+			errLog.Fatalf("couldn't translate %s into a number: %s", args[1], err)
 		}
+	}
+
+	if num > 10 {
+		errLog.Println("That number's pretty high. You sure?")
 	}
 
 	ch := make(chan string, num)
@@ -54,14 +78,15 @@ func main() {
 func runServer() error {
 	handler, err := NewZenBag("zens.txt")
 	if err != nil {
-		fmt.Print("Error reading zens.txt:", err)
+		errLog.Println("Error reading zens.txt:", err)
 		os.Exit(1)
 	}
 	mux := http.NewServeMux()
 
 	mux.Handle("/zen", handler)
 
-	log.Fatal(http.ListenAndServe("localhost:8080", mux))
+	regLog.Printf("Beginning listening on port %s\n", *portFlag)
+	errLog.Fatal(http.ListenAndServe("localhost:"+*portFlag, mux))
 
 	return nil
 }
@@ -75,7 +100,10 @@ type ZensBag struct {
 func (h *ZensBag) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	msg := h.Messages[rand.Intn(len(h.Messages))]
 
-	log.Println(msg)
+	// GET /zen ZEN HERE
+	regLog.Printf(`%s %s "%s"`, r.Method, r.RequestURI, msg)
+
+	// write the response out
 	fmt.Fprintf(w, msg)
 }
 
@@ -90,8 +118,8 @@ func NewZenBag(file string) (*ZensBag, error) {
 }
 
 func fetchZens(out chan string) {
-	// 10 threads
-	for i := 0; i < 10; i++ {
+	// 4 threads
+	for i := 0; i < 4; i++ {
 		go func() {
 			for {
 				if zen := fetchZen(); zen != "" {
@@ -105,19 +133,20 @@ func fetchZens(out chan string) {
 func fetchZen() string {
 	resp, err := http.Get("https://api.github.com/zen")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		errLog.Print(err)
 		return ""
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		errLog.Print(err)
 		return ""
 	}
 
 	if resp.StatusCode != 200 {
-		log.Fatal(string(body))
+		errLog.Print(string(body))
+		os.Exit(2)
 	}
 
 	return string(body)
