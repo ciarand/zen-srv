@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,25 +15,30 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+
+	flag.Parse()
 }
 
 func main() {
-	if len(os.Args) == 1 {
-		log.Fatal(runServer())
+	args := flag.Args()
+
+	if len(args) == 0 {
+		runServer()
+		os.Exit(0)
 	}
 
-	if len(os.Args) > 3 || os.Args[1] != "fetch" {
-		log.Println("ERROR: unknown command structure:", strings.Join(os.Args, " "))
+	if len(args) > 2 || args[0] != "fetch" {
+		log.Println("ERROR: unknown command structure:", strings.Join(args, " "))
 		os.Exit(1)
 	}
 
 	var num = 100
 	var err error
 
-	if len(os.Args) == 3 {
-		num, err = strconv.Atoi(os.Args[2])
+	if len(args) == 3 {
+		num, err = strconv.Atoi(args[1])
 		if err != nil {
-			log.Fatalf("ERROR: couldn't translate %s into a number: %s", os.Args[2], err)
+			log.Fatalf("ERROR: couldn't translate %s into a number: %s", args[1], err)
 		}
 	}
 
