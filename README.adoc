@@ -5,22 +5,37 @@ zen-srv
 A tiny web server that responds to `GET /zen` requests with a new,
 inspirational tagline.
 
-NOTE: Basically all the taglines were stolen from
-https://api.github.com/zen[here].
-
 Getting the taglines
 --------------------
+Running the server requires you have a `zens.txt` file in the current
+directory. It's just a file containing a different phrase on each line.
 
-[,bash]
+[source,bash]
 ----
-./zen-srv fetch 10 > zens.txt # fetches 10 from GitHub's API
+./zen-srv fetch --help
+
+Usage of fetch:
+  -d="1s": the delay between fetch requests (e.g. 1s, 300ms, 2h45m)
+  -n=1: the number of zens to fetch
+  -w=4: the number of worker threads to use
+  -warn=true: when provided zen-srv will warn about rudeness
 ----
 
-Running the server
+I recommend using something like this:
 
-[,bash]
+[source,bash]
 ----
-./zen-srv
+./zen-srv fetch -warn=false -n=50 -w=3 -d=1s >> zens.txt
+----
+
+Once you've got your `zens.txt` file you can run `zen-srv serve`:
+
+[source,bash]
+----
+./zen-srv serve --help
+
+Usage of serve:
+  -p="8080": the port to listen on
 ----
 
 License
