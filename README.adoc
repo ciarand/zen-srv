@@ -28,14 +28,31 @@ I recommend using something like this:
 ./zen-srv fetch -warn=false -n=50 -w=3 -d=1s >> zens.txt
 ----
 
+Or, it turns out, after running 200 odd queries through `sort` and `uniq`, you
+could just use these 14. Bummer.
+
+----
+Anything added dilutes everything else.
+Approachable is better than simple.
+Avoid administrative distraction.
+Design for failure.
+Encourage flow.
+Favor focus over features.
+Half measures are as bad as nothing at all.
+It's not fully shipped until it's fast.
+Keep it logically awesome.
+Mind your words, they are important.
+Non-blocking is better than blocking.
+Practicality beats purity.
+Responsive is better than fast.
+Speak like a human.
+----
+
 Once you've got your `zens.txt` file you can run `zen-srv serve`:
 
 [source,bash]
 ----
-./zen-srv serve --help
-
-Usage of serve:
-  -p="8080": the port to listen on
+./zen-srv serve -p 8080
 ----
 
 License
