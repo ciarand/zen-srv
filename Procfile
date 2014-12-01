@@ -1,1 +1,1 @@
-web: zen-srv serve -p 80
+web: zen-srv serve -p $PORT
