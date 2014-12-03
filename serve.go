@@ -22,6 +22,7 @@ func serveCmd(args []string) error {
 	mux := http.NewServeMux()
 
 	mux.Handle("/zen", handler)
+	mux.HandleFunc("/", missingHandler)
 
 	regLog.Printf("Beginning listening on port %s\n", *portFlag)
 	errLog.Fatal(http.ListenAndServe("localhost:"+*portFlag, mux))
@@ -53,4 +54,10 @@ func (h *ZensBag) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// write the response out
 	fmt.Fprintf(w, msg)
+}
+
+func missingHandler(w http.ResponseWriter, r *http.Request) {
+	regLog.Printf("%s %s", r.Method, r.RequestURI)
+
+	http.NotFound(w, r)
 }
